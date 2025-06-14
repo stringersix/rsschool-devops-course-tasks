@@ -8,6 +8,6 @@ terraform {
 }
 
 resource "aws_s3_bucket" "bucket" {
-# bucket  = here-must-be-your-backet-name
+  # bucket  = here-must-be-your-backet-name
   force_destroy = true
 }
