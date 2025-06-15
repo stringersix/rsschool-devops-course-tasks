@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - task_1
+  pull_request:
 
 jobs:
   terraform-check:
