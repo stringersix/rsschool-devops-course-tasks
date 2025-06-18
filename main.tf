@@ -7,13 +7,13 @@ terraform {
   }
 
   backend "s3" {
-    # bucket  = here-must-be-your-backet-name
+    bucket  = var.bucket_name
     key     = "terraform.tfstate"
-    region  = "eu-north-1"
+    region  = var.aws_region
     encrypt = true
   }
 }
 
 provider "aws" {
-  region = "eu-north-1"
+  region = var.aws_region
 }
