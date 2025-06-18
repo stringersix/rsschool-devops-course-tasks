@@ -47,7 +47,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Terraform Init
-        run: terraform init -var="aws_region=${{ secrets.AWS_REGION }}" -var="backend_name=${{ secrets.AWS_S3_BUCKET_NAME }}"
+        run: terraform init -var="aws_region=${{ secrets.AWS_REGION }}" -backend-config="region=${{ secrets.AWS_REGION }}" -backend-config="bucket=${{ secrets.AWS_S3_BUCKET_NAME }}"
 
       - name: Terraform Plan
         run: terraform plan
@@ -72,7 +72,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Terraform Init
-        run: terraform init -var="aws_region=${{ secrets.AWS_REGION }}" -var="backend_name=${{ secrets.AWS_S3_BUCKET_NAME }}"
+        run: terraform init -var="aws_region=${{ secrets.AWS_REGION }}" -backend-config="region=${{ secrets.AWS_REGION }}" -backend-config="bucket=${{ secrets.AWS_S3_BUCKET_NAME }}"
 
       - name: Terraform Apply
         run: terraform apply -auto-approve

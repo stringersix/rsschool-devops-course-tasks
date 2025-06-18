@@ -29,5 +29,5 @@ variable "github_repo" {
 
 variable "bucket_name" {
   type        = string
-  description = "Name of S3 bucket name"
+  description = "Name of S3 bucket"
 }
