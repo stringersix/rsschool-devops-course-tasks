@@ -12,3 +12,7 @@ variable "azs" {
 variable "bastion_key" {
   type = string
 }
+
+variable "allowed_ip" {
+  type = string
+}
