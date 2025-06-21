@@ -6,7 +6,7 @@
 - in root directory run commands:
 
 ```
-terraform init -backend-config="bucket_name=<your-created-s3-bucket-name-here>"
+terraform init -backend-config="bucket_name=<your-created-s3-bucket-name-here>" -backend-config="region=<your-region>
 terraform plan
 terraform apply -auto-approve
 ```
