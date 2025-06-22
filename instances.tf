@@ -7,7 +7,7 @@ resource "aws_instance" "bastion_nat" {
 
   source_dest_check = false
 
-  user_data = templatefile("${path.module}/setup_bastion.sh.tpl", {
+  user_data = templatefile("${path.module}/setup-bastion.sh.tpl", {
     private_key = tls_private_key.generated_key.private_key_pem
   })
 
@@ -26,6 +26,8 @@ resource "aws_instance" "public_instance_2" {
   vpc_security_group_ids      = [aws_security_group.public_instance.id]
   associate_public_ip_address = true
   key_name                    = aws_key_pair.inner_key.key_name
+
+  user_data = file("${path.module}/setup-webserver.sh")
 
   tags = {
     Name = "donik-public-instance-2"
