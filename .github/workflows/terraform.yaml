@@ -46,9 +46,16 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{secrets.AWS_IAM_ID}}:role/${{secrets.AWS_ROLE_NAME}}
           aws-region: ${{secrets.AWS_REGION}}
+          role-session-name: github-actions
 
       - name: Terraform Init
-        run: terraform init -var="aws_region=${{secrets.AWS_REGION}}" -backend-config="region=${{secrets.AWS_REGION}}" -backend-config="bucket=${{secrets.AWS_S3_BUCKET_NAME}}"
+        run: |
+          terraform init \
+          -var="bastion_key=${{secrets.BASTION_KEYPAIR_NAME}}" \
+          -var="allowed_ip=${{secrets.SSH_ALLOWED_IP}}" \
+          -var="aws_region=${{secrets.AWS_REGION}}" \ 
+          -backend-config="region=${{secrets.AWS_REGION}}" \
+          -backend-config="bucket=${{secrets.AWS_S3_BUCKET_NAME}}"
 
       - name: Terraform Plan
         run: terraform plan
@@ -71,9 +78,16 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{secrets.AWS_IAM_ID}}:role/${{secrets.AWS_ROLE_NAME}}
           aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: github-actions
 
       - name: Terraform Init
-        run: terraform init -var="aws_region=${{secrets.AWS_REGION}}" -backend-config="region=${{secrets.AWS_REGION}}" -backend-config="bucket=${{secrets.AWS_S3_BUCKET_NAME}}"
+        run: |
+          terraform init \
+          -var="bastion_key=${{secrets.BASTION_KEYPAIR_NAME}}" \
+          -var="allowed_ip=${{secrets.SSH_ALLOWED_IP}}" \
+          -var="aws_region=${{secrets.AWS_REGION}}" \ 
+          -backend-config="region=${{secrets.AWS_REGION}}" \
+          -backend-config="bucket=${{secrets.AWS_S3_BUCKET_NAME}}"
 
       - name: Terraform Apply
         run: terraform apply -auto-approve

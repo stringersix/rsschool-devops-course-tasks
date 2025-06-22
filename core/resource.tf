@@ -4,11 +4,16 @@ resource "aws_s3_bucket" "bucket" {
   force_destroy = true
 }
 
+
+data "external" "oidc_thumbprint" {
+  program = ["bash", "${path.module}/get_thumbprint.sh"]
+}
+
 # Create OIDC-provider for GitHub
 resource "aws_iam_openid_connect_provider" "github" {
   url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+  thumbprint_list = [data.external.oidc_thumbprint.result.thumbprint]
 }
 
 # IAM Role for GitHub Actions
@@ -25,8 +30,8 @@ resource "aws_iam_role" "github_actions_role" {
       Action = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringLike = {
-          "token.actions.githubusercontent.com:sub" = "repo:${var.github_org}/${var.github_repo}:ref:refs/heads/*"
-        }
+          "token.actions.githubusercontent.com:sub" = "repo:${var.github_org}/${var.github_repo}:*"
+        },
       }
     }]
   })
