@@ -51,14 +51,15 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init \
-          -var="bastion_key=${{secrets.BASTION_KEYPAIR_NAME}}" \
-          -var="allowed_ip=${{secrets.SSH_ALLOWED_IP}}" \
-          -var="aws_region=${{secrets.AWS_REGION}}" \ 
           -backend-config="region=${{secrets.AWS_REGION}}" \
           -backend-config="bucket=${{secrets.AWS_S3_BUCKET_NAME}}"
 
       - name: Terraform Plan
-        run: terraform plan
+        run: |
+          terraform plan \
+          -var="bastion_key=${{secrets.BASTION_KEYPAIR_NAME}}" \
+          -var="allowed_ip=${{secrets.SSH_ALLOWED_IP}}" \
+          -var="aws_region=${{secrets.AWS_REGION}}" \
 
   terraform-apply:
     name: Terraform Apply
@@ -83,11 +84,12 @@ jobs:
       - name: Terraform Init
         run: |
           terraform init \
-          -var="bastion_key=${{secrets.BASTION_KEYPAIR_NAME}}" \
-          -var="allowed_ip=${{secrets.SSH_ALLOWED_IP}}" \
-          -var="aws_region=${{secrets.AWS_REGION}}" \ 
           -backend-config="region=${{secrets.AWS_REGION}}" \
           -backend-config="bucket=${{secrets.AWS_S3_BUCKET_NAME}}"
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: |
+          terraform apply -auto-approve \
+          -var="bastion_key=${{secrets.BASTION_KEYPAIR_NAME}}" \
+          -var="allowed_ip=${{secrets.SSH_ALLOWED_IP}}" \
+          -var="aws_region=${{secrets.AWS_REGION}}" \
