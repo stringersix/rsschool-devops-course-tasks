@@ -23,7 +23,7 @@ output "public_instance_ips" {
   value       = [aws_instance.public_instance_2.private_ip]
 }
 
-output "public_instance_ips" {
-  description = "List of public instances ip"
+output "public_instance_public_ips" {
+  description = "List of public instances public ip"
   value       = [aws_instance.public_instance_2.public_ip]
 }
