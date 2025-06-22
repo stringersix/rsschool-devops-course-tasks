@@ -22,3 +22,8 @@ output "public_instance_ips" {
   description = "List of public instances ip"
   value       = [aws_instance.public_instance_2.private_ip]
 }
+
+output "public_instance_ips" {
+  description = "List of public instances ip"
+  value       = [aws_instance.public_instance_2.public_ip]
+}
