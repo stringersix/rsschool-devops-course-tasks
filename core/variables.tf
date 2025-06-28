@@ -12,6 +12,11 @@ variable "permissions" {
   ]
 }
 
+variable "region" {
+  type    = string
+  default = "us-east-1"
+}
+
 variable "github_actions_role" {
   type        = string
   description = "Github actions role name"
