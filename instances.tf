@@ -19,23 +19,23 @@ resource "aws_instance" "bastion_nat" {
 }
 
 # Public instance in public-2 subnet
-resource "aws_instance" "public_instance_2" {
-  ami                         = data.aws_ami.amazon_linux_2.id
-  instance_type               = "t2.micro"
-  subnet_id                   = aws_subnet.public_2.id
-  vpc_security_group_ids      = [aws_security_group.public_instance.id]
-  associate_public_ip_address = true
-  key_name                    = aws_key_pair.inner_key.key_name
+# resource "aws_instance" "public_instance_2" {
+#   ami                         = data.aws_ami.amazon_linux_2.id
+#   instance_type               = "t2.micro"
+#   subnet_id                   = aws_subnet.public_2.id
+#   vpc_security_group_ids      = [aws_security_group.public_instance.id]
+#   associate_public_ip_address = true
+#   key_name                    = aws_key_pair.inner_key.key_name
 
-  user_data = file("${path.module}/setup-webserver.sh")
+#   user_data = file("${path.module}/setup-webserver.sh")
 
-  tags = {
-    Name = "donik-public-instance-2"
-  }
-}
+#   tags = {
+#     Name = "donik-public-instance-2"
+#   }
+# }
 
 # Private instance in private-1 subnet
-resource "aws_instance" "private_instance_1" {
+resource "aws_instance" "master" {
   ami                    = data.aws_ami.amazon_linux_2.id
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.private_1.id
@@ -43,6 +43,19 @@ resource "aws_instance" "private_instance_1" {
   key_name               = aws_key_pair.inner_key.key_name
 
   tags = {
-    Name = "donik-private-instance-1"
+    Name = "donik-private-instance-master"
+  }
+}
+
+# Private instance in private-1 subnet
+resource "aws_instance" "agent" {
+  ami                    = data.aws_ami.amazon_linux_2.id
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.private_2.id
+  vpc_security_group_ids = [aws_security_group.private_instance.id]
+  key_name               = aws_key_pair.inner_key.key_name
+
+  tags = {
+    Name = "donik-private-instance-agent"
   }
 }

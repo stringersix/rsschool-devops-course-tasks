@@ -64,6 +64,15 @@ resource "aws_security_group" "private_instance" {
     to_port         = 22
     protocol        = "tcp"
     security_groups = [aws_security_group.bastion_nat_sg.id]
+     description     = "Allow Bastion to access ssh"
+  }
+
+  ingress {
+    from_port       = 6443
+    to_port         = 6443
+    protocol        = "tcp"
+    security_groups = [aws_security_group.bastion_nat_sg.id]
+    description     = "Allow Bastion to access K3s API"
   }
 
   egress {
@@ -72,6 +81,16 @@ resource "aws_security_group" "private_instance" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+resource "aws_security_group_rule" "private_internal" {
+  type                     = "ingress"
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1"
+  security_group_id        = aws_security_group.private_instance.id
+  source_security_group_id = aws_security_group.private_instance.id
+  description              = "Allow all traffic within private SG"
 }
 
 
