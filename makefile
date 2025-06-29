@@ -11,7 +11,7 @@ apply-core:
 	cd core && terraform apply -auto-approve
 
 destroy-core:
-	cd core && terraform apply -auto-approve
+	cd core && terraform destroy -auto-approve
 
 init:
 	terraform init \
