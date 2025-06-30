@@ -13,6 +13,10 @@ variable "bastion_key" {
   type = string
 }
 
+variable "bastion_key_path" {
+  type = string
+}
+
 variable "allowed_ip" {
   type = string
 }
