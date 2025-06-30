@@ -64,7 +64,7 @@ resource "aws_security_group" "private_instance" {
     to_port         = 22
     protocol        = "tcp"
     security_groups = [aws_security_group.bastion_nat_sg.id]
-     description     = "Allow Bastion to access ssh"
+    description     = "Allow Bastion to access ssh"
   }
 
   ingress {
