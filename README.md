@@ -10,7 +10,7 @@ sudo apt install make
 ```
 
 - Create key-pair in your AWS console
-- Create and fill in the .env file. Use .env.example as an example.
+- Create and fill in the `.env` file. Use `.env.example` as an example.
 - in root directory run commands:
 
 ```
