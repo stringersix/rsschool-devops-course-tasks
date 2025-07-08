@@ -1,0 +1,15 @@
+controller:
+  admin:
+    username: admin
+    password: admin
+  serviceType: NodePort
+  installPlugins:
+    - kubernetes
+    - workflow-aggregator
+    - git
+    - configuration-as-code
+    - matrix-auth
+  persistence:
+    enabled: true
+    size: 4Gi
+    storageClass: standard
