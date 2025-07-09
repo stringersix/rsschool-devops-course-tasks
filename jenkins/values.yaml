@@ -9,7 +9,18 @@ controller:
     - git
     - configuration-as-code
     - matrix-auth
+    - job-dsl
   persistence:
     enabled: true
     size: 4Gi
     storageClass: standard
+  JCasC:
+    configScripts:
+      hello-job: |
+        jobs:
+          - script: >
+              job('hello-world') {
+                steps {
+                  shell('echo Hello world')
+                }
+              }
