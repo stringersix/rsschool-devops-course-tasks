@@ -1,6 +1,6 @@
 # rsschool-devops-course-tasks
 
-- Follow the instructions to install [AWS CLI 2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+<!-- - Follow the instructions to install [AWS CLI 2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 - Follow the instructions to install [Terraform 1.6+](https://developer.hashicorp.com/terraform/install?product_intent=terraform).
 - Install make (here example for Ubuntu):
 
@@ -37,4 +37,6 @@ export KUBECONFIG=~/.kube/config && kubectl get nodes
 ```
 make destroy
 make destroy-core
-```
+``` -->
+
+- task 5 init
