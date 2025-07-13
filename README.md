@@ -45,6 +45,7 @@ sudo apt update
 sudo apt install -y docker.io
 sudo systemctl enable --now docker
 sudo usermod -aG docker $USER
+newgrp docker
 ```
 
 - install kubectl
@@ -65,6 +66,11 @@ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 helm version
 ```
 
+- run deploy by script or do it manually (see next step)
+```
+bash deploy/setup.sh
+```
+
 - run minikube
 ```
 minikube start --driver=docker
@@ -83,7 +89,7 @@ docker build -t flask-app .
 - install chart (from root)
 
 ```
-helm install flask-app ./deploy/helm/
+helm install flask-app ./deploy/helm/ --wait
 ```
 
 - host and check it in browser (use link from output)
@@ -94,6 +100,8 @@ minikube service flask-app
 - after all you can uninstall it
 ```
 helm uninstall flask-app
+minikube stop --all
+minikube delete --all
 ```
 
 
