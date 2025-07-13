@@ -39,4 +39,61 @@ make destroy
 make destroy-core
 ``` -->
 
-- task 5 init
+- install docker
+```
+sudo apt update
+sudo apt install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+```
+
+- install kubectl
+```
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+kubectl version --client
+```
+- install minikube
+```
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+minikube version
+```
+- install helm
+```
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+helm version
+```
+
+- run minikube
+```
+minikube start --driver=docker
+```
+
+- connect docker to minikube
+```
+eval $(minikube docker-env)
+```
+
+- build image (in minikube enviroment)
+```
+docker build -t flask-app .
+```
+
+- install chart (from root)
+
+```
+helm install flask-app ./deploy/helm/
+```
+
+- host and check it in browser (use link from output)
+```
+minikube service flask-app
+```
+
+- after all you can uninstall it
+```
+helm uninstall flask-app
+```
+
+
