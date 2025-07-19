@@ -39,7 +39,7 @@ make destroy
 make destroy-core
 ``` -->
 
-- install docker
+<!-- - install docker
 ```
 sudo apt update
 sudo apt install -y docker.io
@@ -102,6 +102,8 @@ minikube service flask-app
 helm uninstall flask-app
 minikube stop --all
 minikube delete --all
-```
+``` -->
 
+
+init task 6
 
