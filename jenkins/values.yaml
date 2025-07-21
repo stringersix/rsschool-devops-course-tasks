@@ -1,7 +1,4 @@
 controller:
-  admin:
-    username: admin
-    password: admin666
   serviceType: NodePort
   installPlugins:
     - kubernetes
@@ -10,30 +7,9 @@ controller:
     - configuration-as-code
     - matrix-auth
     - job-dsl
+    - docker-workflow
+    - kubernetes-cli
   persistence:
     enabled: true
     size: 4Gi
     storageClass: standard
-  JCasC:
-    configScripts:
-      hello-job: |
-        jobs:
-          - script: >
-              job('hello-world') {
-                steps {
-                  shell('echo Hello world')
-                }
-              }
-      security: |
-        jenkins:
-          securityRealm:
-            local:
-              allowsSignup: false
-              users:
-                - id: "user1"
-                  password: "password1"
-                - id: "user2"
-                  password: "password2"
-          authorizationStrategy:
-            loggedInUsersCanDoAnything:
-              allowAnonymousRead: false

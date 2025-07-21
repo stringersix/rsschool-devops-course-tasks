@@ -1,0 +1,43 @@
+pipeline {
+  agent {
+    kubernetes {
+      yamlFile 'jenkins/builder.yaml'
+    }
+  }
+
+  stages {
+    stage('Prepare Workspace') {
+      steps {
+        sh 'cp -r ${WORKSPACE}/* /workspace/'
+        sh 'find /workspace'
+      }
+    }
+
+    stage('Build and Push Image') {
+      steps {
+        container('kaniko') {
+          sh '''
+            /kaniko/executor --dockerfile=/workspace/deploy/app/Dockerfile \
+                             --context=/workspace/deploy/app \
+                             --destination=daniluk666/flask:latest \
+                             --cleanup
+          '''
+        }
+      }
+    }
+
+    stage('Deploy with Helm') {
+      steps {
+        container('helm') {
+          sh '''
+            helm upgrade --install flask-app /workspace/deploy/helm --wait\
+              --namespace flask \
+              --create-namespace \
+              --set image.repository=daniluk666/flask \
+              --set image.tag=latest
+          '''
+        }
+      }
+    }
+  }
+}
