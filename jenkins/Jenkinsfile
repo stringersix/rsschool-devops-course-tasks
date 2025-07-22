@@ -5,11 +5,23 @@ pipeline {
     }
   }
 
+  post {
+    success {
+      mail to: 'sixstringer91@gmail.com',
+           subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+           body: "Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} succeeded.\nCheck it at ${env.BUILD_URL}"
+    }
+    failure {
+      mail to: 'sixstringer91@gmail.com',
+           subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+           body: "Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} failed.\nCheck it at ${env.BUILD_URL}"
+    }
+  }
+
   stages {
     stage('Prepare Workspace') {
       steps {
         sh 'cp -r ${WORKSPACE}/* /workspace/'
-        sh 'find /workspace'
       }
     }
 
@@ -63,6 +75,17 @@ pipeline {
               --set image.repository=daniluk666/flask \
               --set image.tag=latest \
               --wait
+          '''
+        }
+      }
+    }
+
+    stage('Verify Deployment') {
+      steps {
+        container('python') {
+          sh '''
+          pip install requests
+          python /workspace/deploy/verify.py http://flask-app.jenkins.svc.cluster.local:8080
           '''
         }
       }
