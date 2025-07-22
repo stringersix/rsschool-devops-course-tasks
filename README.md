@@ -105,5 +105,4 @@ minikube delete --all
 ``` -->
 
 
-Follow the instructions
-
+test
