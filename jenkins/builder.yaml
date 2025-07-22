@@ -20,6 +20,16 @@ spec:
       - name: "workspace-volume"
         mountPath: "/workspace"
 
+  # Kubectl
+    - name: kubectl
+      image: lachlanevenson/k8s-kubectl:latest
+      command:
+        - cat
+      tty: true
+      volumeMounts:
+      - name: "workspace-volume"
+        mountPath: "/workspace"
+
   # KANIKO
     - name: kaniko
       image: gcr.io/kaniko-project/executor:debug

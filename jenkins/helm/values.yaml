@@ -1,0 +1,30 @@
+controller:
+  admin:
+    username: admin
+    password: admin
+  serviceType: NodePort
+  installPlugins:
+    - kubernetes
+    - workflow-aggregator
+    - git
+    - configuration-as-code
+    - matrix-auth
+    - job-dsl
+    - docker-workflow
+    - kubernetes-cli
+  persistence:
+    enabled: true
+    size: 4Gi
+    storageClass: standard
+  serviceAccount:
+    create: false
+    name: jenkins
+  rbac:
+    create: true
+    clusterWideAccess: false
+    rules:
+      - resources: ["configmaps", "pods", "pods/attach", "secrets", "services"]
+        verbs: ["get", "list", "watch", "create", "patch", "update", "delete"]
+      - apiGroups: [""]
+        resources: ["pods/exec"]
+        verbs: ["create", "patch", "delete"]
