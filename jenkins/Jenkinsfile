@@ -24,6 +24,24 @@ pipeline {
       }
     }
 
+    stage('SonarQube Analysis') {
+      steps {
+        container('sonar-scanner') {
+          withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+            sh "echo $SONAR_TOKEN"
+            sh """
+              sonar-scanner \\
+                -Dsonar.projectKey=stringersix_rsschool-devops-course-tasks \\
+                -Dsonar.organization=stringersix \\
+                -Dsonar.host.url=https://sonarcloud.io \\
+                -Dsonar.token=\$SONAR_TOKEN \\
+                -Dsonar.sources=/workspace/deploy/app
+            """
+          }
+        }
+      }
+    }
+
     stage('Build and Push Image') {
       steps {
         container('kaniko') {
