@@ -105,5 +105,5 @@ minikube delete --all
 ``` -->
 
 
-init task 6
+Follow the instructions
 

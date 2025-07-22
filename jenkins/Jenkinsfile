@@ -4,10 +4,6 @@ pipeline {
       yamlFile 'jenkins/builder.yaml'
     }
   }
-  
-  triggers {
-    pollSCM('H/5 * * * *')
-  }
 
   stages {
     stage('Prepare Workspace') {
