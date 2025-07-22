@@ -13,10 +13,13 @@ pipeline {
       }
     }
 
-    stage('Setup RBAC') {
+    stage('Tests') {
       steps {
-        container('kubectl') {
-          sh 'kubectl apply -f /workspace/jenkins/admin-binding.yaml'
+        container('python') {
+          sh '''
+            pip install flake8
+            flake8 /workspace/deploy/app/main.py
+          '''
         }
       }
     }

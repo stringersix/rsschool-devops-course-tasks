@@ -20,15 +20,14 @@ spec:
       - name: "workspace-volume"
         mountPath: "/workspace"
 
-  # Kubectl
-    - name: kubectl
-      image: lachlanevenson/k8s-kubectl:latest
-      command:
-        - cat
+  # PYTHON
+    - name: python
+      image: python:3.11
+      command: ['cat']
       tty: true
       volumeMounts:
-      - name: "workspace-volume"
-        mountPath: "/workspace"
+      - name: workspace-volume
+        mountPath: /workspace
 
   # KANIKO
     - name: kaniko

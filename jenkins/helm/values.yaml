@@ -16,15 +16,3 @@ controller:
     enabled: true
     size: 4Gi
     storageClass: standard
-  serviceAccount:
-    create: false
-    name: jenkins
-  rbac:
-    create: true
-    clusterWideAccess: false
-    rules:
-      - resources: ["configmaps", "pods", "pods/attach", "secrets", "services"]
-        verbs: ["get", "list", "watch", "create", "patch", "update", "delete"]
-      - apiGroups: [""]
-        resources: ["pods/exec"]
-        verbs: ["create", "patch", "delete"]
