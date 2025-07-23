@@ -152,6 +152,6 @@ minikube service jenkins -n jenkins
 
 - provide vars discord-webhook and sonar-token (secret text)
 
-- create pipeline
+- create pipeline (path to jenkinsfile: jenkins/Jenkinsfile)
 
 - run pipeline and enjoy!
