@@ -144,6 +144,11 @@ helm upgrade --install jenkins jenkins/jenkins   -n jenkins --create-namespace  
 kubectl apply -f jenkins/admin-binding.yaml
 ```
 
+- create dockerconfig secret creds for kaniko
+```
+kubectl create secret generic docker-config   --from-file=.dockerconfigjson=./config.json   --type=kubernetes.io/dockerconfigjson   -n jenkins
+```
+
 - host and check it in browser (use link from output). login and password - "admin"
 
 ```
