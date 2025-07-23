@@ -1,4 +1,5 @@
 import requests
+import sys
 
 def verify_url(url):
     try:
