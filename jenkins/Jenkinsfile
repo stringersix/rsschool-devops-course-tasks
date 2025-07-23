@@ -5,16 +5,37 @@ pipeline {
     }
   }
 
+  environment {
+    MESSAGE_SUCCESS = "✅ Deployment successful!"
+    MESSAGE_FAILURE = "❌ Deployment failed!"
+  }
+
   post {
     success {
-      mail to: 'sixstringer91@gmail.com',
-           subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-           body: "Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} succeeded.\nCheck it at ${env.BUILD_URL}"
+      script {
+        withCredentials([string(credentialsId: 'discord-webhook', variable: 'WEBHOOK_URL')]) {
+          def payload = [content: env.MESSAGE_SUCCESS]
+          httpRequest(
+            httpMode: 'POST',
+            contentType: 'APPLICATION_JSON',
+            requestBody: groovy.json.JsonOutput.toJson(payload),
+            url: WEBHOOK_URL
+          )
+        }
+      }
     }
     failure {
-      mail to: 'sixstringer91@gmail.com',
-           subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-           body: "Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} failed.\nCheck it at ${env.BUILD_URL}"
+      script {
+        withCredentials([string(credentialsId: 'discord-webhook', variable: 'WEBHOOK_URL')]) {
+          def payload = [content: env.MESSAGE_FAILURE]
+          httpRequest(
+            httpMode: 'POST',
+            contentType: 'APPLICATION_JSON',
+            requestBody: groovy.json.JsonOutput.toJson(payload),
+            url: WEBHOOK_URL
+          )
+        }
+      }
     }
   }
 
