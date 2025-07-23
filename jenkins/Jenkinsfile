@@ -51,7 +51,18 @@ pipeline {
         container('python') {
           sh '''
             pip install flake8
-            flake8 /workspace/deploy/app/main.py
+            echo "Running flake8 on /workspace/deploy/app"
+
+            flake8 /workspace/deploy/app > flake8_report.txt
+            exit_code=$?
+
+            if [ $exit_code -ne 0 ]; then
+              echo "❌ Flake8 reported issues:"
+              cat flake8_report.txt
+              exit $exit_code
+            else
+              echo "✅ Flake8 passed with no issues."
+            fi
           '''
         }
       }
