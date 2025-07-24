@@ -1,0 +1,65 @@
+kind: Pod
+
+spec:
+  volumes:
+    - name: workspace-volume
+      emptyDir: {}
+    - name: jenkins-docker-cfg
+      projected:
+        sources:
+        - secret:
+            name: docker-credentials
+            items:
+              - key: .dockerconfigjson
+                path: config.json
+  containers:
+  # JNLP
+    - name: "jnlp"
+      image: "jenkins/inbound-agent:latest"
+      volumeMounts:
+      - name: "workspace-volume"
+        mountPath: "/workspace"
+
+  # PYTHON
+    - name: python
+      image: python:3.11
+      command: ['cat']
+      tty: true
+      volumeMounts:
+      - name: workspace-volume
+        mountPath: /workspace
+
+  # SONAR
+    - name: sonar-scanner
+      image: sonarsource/sonar-scanner-cli:latest
+      command:
+        - cat
+      tty: true
+      volumeMounts:
+      - name: workspace-volume
+        mountPath: /workspace
+
+  # KANIKO
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:debug
+      imagePullPolicy: Always
+      command:
+      - sleep
+      args:
+      - 9999999
+      volumeMounts:
+        - name: workspace-volume
+          mountPath: /workspace
+        - name: jenkins-docker-cfg
+          mountPath: /kaniko/.docker
+
+  # HELM
+    - name: helm
+      image: alpine/helm:3.14.0
+      imagePullPolicy: Always
+      command:
+        - cat
+      tty: true
+      volumeMounts:
+        - name: workspace-volume
+          mountPath: /workspace
