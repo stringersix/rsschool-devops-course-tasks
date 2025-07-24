@@ -51,22 +51,24 @@ pipeline {
         container('python') {
           sh '''
             set +e
-            pip install flake8
-            echo "Running flake8 on /workspace/deploy/app"
 
-            flake8 /workspace/deploy/app > flake8_report.txt
+            pip install flask pytest
+            cd /workspace/deploy
+            echo "Running pytest tests..."
+            pytest test.py -q --disable-warnings > pytest_report.txt
             exit_code=$?
 
-            echo "flake8 exit code: $exit_code"
+            echo "pytest exit code: $exit_code"
 
             if [ $exit_code -ne 0 ]; then
-              echo "❌ Flake8 reported issues:"
-              cat flake8_report.txt
+              echo "❌ Pytest reported failed tests:"
+              cat pytest_report.txt
               exit $exit_code
             else
-              echo "✅ Flake8 passed with no issues."
+              echo "✅ Pytest passed all tests."
             fi
-            set e
+
+            set -e
           '''
         }
       }
