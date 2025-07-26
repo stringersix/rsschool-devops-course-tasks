@@ -103,7 +103,7 @@ helm uninstall flask-app
 minikube stop --all
 minikube delete --all
 ``` -->
-
+<!-- 
 
 - install docker
 ```
@@ -159,4 +159,7 @@ minikube service jenkins -n jenkins
 
 - create pipeline (path to jenkinsfile: jenkins/Jenkinsfile)
 
-- run pipeline and enjoy!
+- run pipeline and enjoy! -->
+
+
+init task 7
