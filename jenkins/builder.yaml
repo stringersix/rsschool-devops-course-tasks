@@ -30,14 +30,14 @@ spec:
         mountPath: /workspace
 
   # SONAR
-    - name: sonar-scanner
-      image: sonarsource/sonar-scanner-cli:latest
-      command:
-        - cat
-      tty: true
-      volumeMounts:
-      - name: workspace-volume
-        mountPath: /workspace
+    # - name: sonar-scanner
+    #   image: sonarsource/sonar-scanner-cli:latest
+    #   command:
+    #     - cat
+    #   tty: true
+    #   volumeMounts:
+    #   - name: workspace-volume
+    #     mountPath: /workspace
 
   # KANIKO
     - name: kaniko
