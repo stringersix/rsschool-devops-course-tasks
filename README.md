@@ -191,55 +191,33 @@ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 helm version
 ```
 
-- install jenkins chart
+- add repos to helm
 
 ```
-helm upgrade --install jenkins jenkins/jenkins   -n jenkins --create-namespace   -f jenkins/helm/values.yaml
-```
-
-- apply admin binding
-
-```
-kubectl apply -f jenkins/admin-binding.yaml
-```
-
-- create dockerconfig secret creds for kaniko
-```
-kubectl create secret generic docker-config   --from-file=.dockerconfigjson=./config.json   --type=kubernetes.io/dockerconfigjson   -n jenkins
-```
-
-- add prometeus repo to helm, then install it on k8s cluster
-
-```
+helm repo add jenkins https://charts.jenkins.io
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
-
-helm install prometheus prometheus-community/prometheus -n jenkins
 ```
 
-- Expose the k8s Prometheus-server service
-
+- install make 
 ```
-kubectl expose service prometheus-server --type=NodePort --target-port=9090 --name=prometheus-server-ext -n jenkins
-```
-
-- get the Grafana Helm chart, then install it on k8s cluster
-
-```
-helm repo add grafana https://grafana.github.io/helm-charts 
-helm repo update
-
-helm install grafana grafana/grafana -n jenkins
+sudo apt update
+sudo apt install make -y
 ```
 
-- Expose the Grafana-service on k8s
-
+- run minikube 
 ```
-kubectl expose service grafana --type=NodePort --target-port=3000 --name=grafana-ext -n jenkins
+minikube run --driver=docker
 ```
 
-- To get the password for admin, run this command on a new terminal
+- create and fill .env file in root as .env.example
 
+- install jenkins via make command (you need to provide docker-config file to the project root as "сonfig.json")
 ```
-kubectl get secret --namespace jenkins grafana -o jsonpath="{.data.admin-password}" | base64 --decode && echo
+make setup-jenkins
+```
+
+- install monitoring tools via make command
+```
+make setup-monitoring
 ```

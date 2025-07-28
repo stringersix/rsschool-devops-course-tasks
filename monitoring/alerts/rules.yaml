@@ -1,7 +1,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: prometheus-alert-rules
+  name: prometheus-alert-rules-test
   labels:
     role: alert-rules
 spec:
@@ -24,3 +24,22 @@ spec:
       annotations:
         summary: "Low memory available on instance {{ $labels.instance }}"
         description: "Available memory is below 10%."
+
+  - name: node-alerts-test
+    rules:
+    - alert: HighCPUUsageTest
+      expr: vector(1)
+      for: 0s
+      labels:
+        severity: warning
+      annotations:
+        summary: "Test: High CPU usage alert"
+        description: "This alert fires immediately for testing purposes."
+    - alert: LowMemoryTest
+      expr: vector(1)
+      for: 0s
+      labels:
+        severity: warning
+      annotations:
+        summary: "Test: Low memory alert"
+        description: "This alert fires immediately for testing purposes."

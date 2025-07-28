@@ -45,17 +45,25 @@ destroy:
 		-var="bastion_key=$(BASTION_KEY)" \
 		-var="allowed_ip=$(ALLOWED_IP)"
 
+# JENKINS
+setup-jenkins: 
+	helm upgrade --install jenkins jenkins/jenkins   -n jenkins --create-namespace   -f jenkins/helm/values.yaml
+	kubectl apply -f jenkins/admin-binding.yaml
+	kubectl create secret generic docker-config   --from-file=.dockerconfigjson=./config.json   --type=kubernetes.io/dockerconfigjson   -n jenkins
+
 
 # MONITORING
 setup-monitoring:
 	@echo "🔧 Installing $(RELEASE) in $(NAMESPACE)..."
 	helm upgrade --install $(RELEASE) $(CHART) \
-		--namespace $(NAMESPACE) --create-namespace \
-		-f monitoring/helm/values.yaml
+  		--namespace $(NAMESPACE) --create-namespace \
+  		-f monitoring/helm/values.yaml \
+		--wait
+		
 
 	@echo "🔐 Generate Alert Manager config from template and create secret..."
 	@export SMTP_EMAIL=$(SMTP_EMAIL) SMTP_PASS=$(SMTP_PASS); \
-	envsubst < monitoring/alerts/alertmanager.yml.tpl | \
+	envsubst < monitoring/alerts/alertmanager.yaml.tpl | \
 	kubectl create secret generic alertmanager-config \
     	--from-file=alertmanager.yaml=/dev/stdin \
     	-n $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
@@ -75,6 +83,11 @@ setup-monitoring:
 	@echo "📋 Creating Prometheus alert rules ConfigMap..."
 	kubectl apply -f monitoring/alerts/rules.yaml -n $(NAMESPACE)
 
+	@echo "🔐 Creating SMTP secret..."
+	kubectl create secret generic smtp-auth-secret \
+		--from-literal=password=$(SMTP_PASS) \
+		-n $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+
 	@echo "✅ Monitoring stack deployed successfully!"
 
 
@@ -82,9 +95,10 @@ uninstall-monitoring:
 	@echo "🗑️ Uninstalling $(RELEASE) from $(NAMESPACE)..."
 	helm uninstall $(RELEASE) -n $(NAMESPACE)
 	kubectl delete secret $(SECRET_NAME) -n $(NAMESPACE) --ignore-not-found
-	kubectl delete secret alertmanager-config -n $(NAMESPACE) --ignore-not-found
+	kubectl delete secret smtp-auth-secret -n $(NAMESPACE) --ignore-not-found
 	kubectl delete configmap jenkins-dashboard -n $(NAMESPACE) --ignore-not-found
 	kubectl delete configmap prometheus-alert-rules -n $(NAMESPACE) --ignore-not-found
+	kubectl delete alertmanagerconfig email-config -n $(NAMESPACE) --ignore-not-found
 
 
 stress:
