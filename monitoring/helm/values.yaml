@@ -1,0 +1,19 @@
+prometheus:
+  prometheusSpec:
+    additionalScrapeConfigs:
+      - job_name: 'jenkins'
+        metrics_path: '/prometheus/'
+        static_configs:
+          - targets: ['jenkins.jenkins.svc.cluster.local:8080']
+    ruleSelectorNilUsesHelmValues: false
+    ruleSelector:
+      matchLabels:
+        role: alert-rules
+grafana:
+  admin:
+    existingSecret: grafana-admin-secret
+    userKey: admin-user
+    passwordKey: admin-password
+alertmanager:
+  alertmanagerSpec:
+    configSecret: alertmanager-config

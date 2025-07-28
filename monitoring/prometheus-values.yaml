@@ -1,6 +1,0 @@
-prometheus:
-  prometheusSpec:
-    additionalScrapeConfigs:
-      - job_name: 'jenkins'
-        static_configs:
-          - targets: ['jenkins.jenkins.svc.cluster.local:8080']

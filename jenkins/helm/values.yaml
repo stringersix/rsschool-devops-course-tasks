@@ -12,6 +12,7 @@ controller:
     - job-dsl
     - docker-workflow
     - kubernetes-cli
+    - prometheus
   persistence:
     enabled: true
     size: 4Gi
