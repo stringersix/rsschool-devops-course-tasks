@@ -217,7 +217,18 @@ minikube run --driver=docker
 make setup-jenkins
 ```
 
-- install monitoring tools via make command
+- install monitoring tools via make command or (see next)
 ```
 make setup-monitoring
+```
+
+- host jenkins in browser (use link from output), then configure and run pipeline. login and password - "admin"
+
+```
+minikube service jenkins -n jenkins
+```
+
+- after all jobs done, host grafana in browser
+```
+minikube service prom-stack-grafana -n monitoring
 ```
