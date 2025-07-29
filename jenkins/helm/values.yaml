@@ -18,3 +18,18 @@ controller:
     enabled: true
     size: 4Gi
     storageClass: standard
+
+  podTemplate:
+    volumes:
+      - name: env-volume
+        secret:
+          secretName: my-env-secret
+    containers:
+      - name: jnlp
+        volumeMounts:
+          - name: env-volume
+            mountPath: /etc/secrets
+            readOnly: true
+    env:
+      - name: ENV_PATH
+        value: /etc/secrets/.env

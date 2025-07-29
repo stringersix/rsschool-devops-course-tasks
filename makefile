@@ -49,18 +49,17 @@ destroy:
 setup-jenkins: 
 	helm upgrade --install jenkins jenkins/jenkins   -n jenkins --create-namespace   -f jenkins/helm/values.yaml
 	kubectl apply -f jenkins/admin-binding.yaml
-	kubectl create secret generic docker-config   --from-file=.dockerconfigjson=./config.json   --type=kubernetes.io/dockerconfigjson   -n jenkins
+	kubectl create secret generic my-env-secret --from-file=.env --namespace jenkins
 
 
 # MONITORING
 setup-monitoring:
 	@echo "🔧 Installing $(RELEASE) in $(NAMESPACE)..."
-	helm upgrade --install $(RELEASE) $(CHART) \
+	helm upgrade --install $(RELEASE) prometheus-community/kube-prometheus-stack \
   		--namespace $(NAMESPACE) --create-namespace \
   		-f monitoring/helm/values.yaml \
 		--wait
 		
-
 	@echo "🔐 Generate Alert Manager config from template and create secret..."
 	@export SMTP_EMAIL=$(SMTP_EMAIL) SMTP_PASS=$(SMTP_PASS); \
 	envsubst < monitoring/alerts/alertmanager.yaml.tpl | \
