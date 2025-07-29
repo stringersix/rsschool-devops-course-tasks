@@ -47,57 +47,23 @@ destroy:
 
 # JENKINS
 setup-jenkins: 
-	helm upgrade --install jenkins jenkins/jenkins   -n jenkins --create-namespace   -f jenkins/helm/values.yaml
+	helm upgrade --install jenkins jenkins/jenkins -n jenkins --create-namespace -f jenkins/helm/values.yaml
 	kubectl apply -f jenkins/admin-binding.yaml
 	kubectl create secret generic my-env-secret --from-file=.env --namespace jenkins
 
 
 # MONITORING
 setup-monitoring:
-	@echo "🔧 Installing $(RELEASE) in $(NAMESPACE)..."
-	helm upgrade --install $(RELEASE) prometheus-community/kube-prometheus-stack \
-  		--namespace $(NAMESPACE) --create-namespace \
-  		-f monitoring/helm/values.yaml \
-		--wait
-		
-	@echo "🔐 Generate Alert Manager config from template and create secret..."
-	@export SMTP_EMAIL=$(SMTP_EMAIL) SMTP_PASS=$(SMTP_PASS); \
-	envsubst < monitoring/alerts/alertmanager.yaml.tpl | \
-	kubectl create secret generic alertmanager-config \
-    	--from-file=alertmanager.yaml=/dev/stdin \
-    	-n $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-
-	@echo "🔐 Creating Grafana admin secret..."
-	kubectl create secret generic $(SECRET_NAME) \
-		--from-literal=admin-user=admin \
-		--from-literal=admin-password=admin123 \
-		-n $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-
-	@echo "📊 Creating Grafana dashboard configmap..."
-	kubectl create configmap jenkins-dashboard \
-		--from-file=dashboard.json=monitoring/dashboard.json \
-		-n $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	kubectl label configmap jenkins-dashboard grafana_dashboard=1 -n $(NAMESPACE) --overwrite
-
-	@echo "📋 Creating Prometheus alert rules ConfigMap..."
-	kubectl apply -f monitoring/alerts/rules.yaml -n $(NAMESPACE)
-
-	@echo "🔐 Creating SMTP secret..."
-	kubectl create secret generic smtp-auth-secret \
-		--from-literal=password=$(SMTP_PASS) \
-		-n $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-
-	@echo "✅ Monitoring stack deployed successfully!"
-
+	bash ./monitoring/setup.sh
 
 uninstall-monitoring:
-	@echo "🗑️ Uninstalling $(RELEASE) from $(NAMESPACE)..."
-	helm uninstall $(RELEASE) -n $(NAMESPACE)
-	kubectl delete secret $(SECRET_NAME) -n $(NAMESPACE) --ignore-not-found
-	kubectl delete secret smtp-auth-secret -n $(NAMESPACE) --ignore-not-found
-	kubectl delete configmap jenkins-dashboard -n $(NAMESPACE) --ignore-not-found
-	kubectl delete configmap prometheus-alert-rules -n $(NAMESPACE) --ignore-not-found
-	kubectl delete alertmanagerconfig email-config -n $(NAMESPACE) --ignore-not-found
+	@echo "🗑️ Uninstalling prom-stack from monitoring..."
+	helm uninstall prom-stack -n monitoring
+	kubectl delete secret grafana-admin-secret -n monitoring --ignore-not-found
+	kubectl delete secret smtp-auth-secret -n monitoring --ignore-not-found
+	kubectl delete configmap jenkins-dashboard -n monitoring --ignore-not-found
+	kubectl delete configmap prometheus-alert-rules -n monitoring --ignore-not-found
+	kubectl delete alertmanagerconfig email-config -n monitoring --ignore-not-found
 
 
 stress:
