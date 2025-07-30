@@ -22,6 +22,11 @@ pipeline {
       ]) {
         container('toolbox') {
         sh '''
+        echo "🌐 Create namespace for monitoring..."
+        kubectl create namespace monitoring || true
+        '''
+      
+        sh '''
         echo "🔐 Generate Alert Manager config from template and create secret..."
         export SMTP_EMAIL="$SMTP_EMAIL" SMTP_PASS="$SMTP_PASS"
         envsubst < monitoring/alerts/alertmanager.yaml.tpl | \
@@ -42,10 +47,6 @@ pipeline {
         --from-file=dashboard.json=monitoring/dashboard.json \
         -n monitoring --dry-run=client -o yaml | kubectl apply -f -
         kubectl label configmap jenkins-dashboard grafana_dashboard=1 -n monitoring --overwrite
-        '''
-        sh '''
-        echo "📋 Creating Prometheus alert rules ConfigMap..."
-        kubectl apply -f monitoring/alerts/rules.yaml -n monitoring
         '''
         sh '''
         echo "🔐 Creating SMTP secret..."
