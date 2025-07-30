@@ -14,12 +14,7 @@ spec:
       volumeMounts:
       - name: workspace-volume
         mountPath: /workspace
-      - name: env-volume
-        mountPath: /etc/secrets
-        readOnly: true
-      env:
-      - name: ENV_PATH
-        value: /etc/secrets/.env
+
 
 
   # toolbox
@@ -31,53 +26,3 @@ spec:
       volumeMounts:
       - name: workspace-volume
         mountPath: /workspace
-      - name: env-volume
-        mountPath: /etc/secrets
-        readOnly: true
-      env:
-      - name: ENV_PATH
-        value: /etc/secrets/.env
-
-  # PYTHON
-    # - name: python
-    #   image: python:3.11
-    #   command: ['cat']
-    #   tty: true
-    #   volumeMounts:
-    #   - name: workspace-volume
-    #     mountPath: /workspace
-
-  # SONAR
-    # - name: sonar-scanner
-    #   image: sonarsource/sonar-scanner-cli:latest
-    #   command:
-    #     - cat
-    #   tty: true
-    #   volumeMounts:
-    #   - name: workspace-volume
-    #     mountPath: /workspace
-
-  # KANIKO
-    # - name: kaniko
-    #   image: gcr.io/kaniko-project/executor:debug
-    #   imagePullPolicy: Always
-    #   command:
-    #   - sleep
-    #   args:
-    #   - 9999999
-    #   volumeMounts:
-    #     - name: workspace-volume
-    #       mountPath: /workspace
-    #     - name: jenkins-docker-cfg
-    #       mountPath: /kaniko/.docker
-
-  # HELM
-    # - name: helm
-    #   image: alpine/helm:3.14.0
-    #   imagePullPolicy: Always
-    #   command:
-    #     - cat
-    #   tty: true
-    #   volumeMounts:
-    #     - name: workspace-volume
-    #       mountPath: /workspace

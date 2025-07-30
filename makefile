@@ -47,9 +47,12 @@ destroy:
 
 # JENKINS
 setup-jenkins: 
-	helm upgrade --install jenkins jenkins/jenkins -n jenkins --create-namespace -f jenkins/helm/values.yaml
 	kubectl apply -f jenkins/admin-binding.yaml
-	kubectl create secret generic my-env-secret --from-file=.env --namespace jenkins
+	helm upgrade --install jenkins jenkins/jenkins -n jenkins --create-namespace -f jenkins/helm/values.yaml \
+	  	--set mySecrets.smtpEmail="$(SMTP_EMAIL)" \
+  		--set mySecrets.smtpPass="$(SMTP_PASS)" \
+  		--set mySecrets.grafanaAdminPass="$(ADMIN_PASSWORD)"
+
 
 
 # MONITORING

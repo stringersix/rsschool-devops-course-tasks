@@ -19,17 +19,44 @@ controller:
     size: 4Gi
     storageClass: standard
 
-  podTemplate:
-    volumes:
-      - name: env-volume
-        secret:
-          secretName: my-env-secret
-    containers:
-      - name: jnlp
-        volumeMounts:
-          - name: env-volume
-            mountPath: /etc/secrets
-            readOnly: true
-    env:
-      - name: ENV_PATH
-        value: /etc/secrets/.env
+  JCasC:
+    defaultConfig: false
+    configScripts:
+      credentials: |
+        credentials:
+          system:
+            domainCredentials:
+              - credentials:
+                  - string:
+                      scope: GLOBAL
+                      id: "SMTP_EMAIL"
+                      description: "SMTP email"
+                      secret: {{ .Values.mySecrets.smtpEmail | quote }}
+                  - string:
+                      scope: GLOBAL
+                      id: "SMTP_PASS"
+                      description: "SMTP password"
+                      secret: {{ .Values.mySecrets.smtpPass | quote }}
+                  - string:
+                      scope: GLOBAL
+                      id: "GRAFANA_ADMIN_PASS"
+                      description: "Grafana admin password"
+                      secret: {{ .Values.mySecrets.grafanaAdminPass | quote }}
+      my-config: |-
+        jobs:
+          - script: >
+              pipelineJob('deploy-monitoring') {
+                definition {
+                  cpsScm {
+                    scm {
+                      git {
+                        remote {
+                          url('https://github.com/stringersix/rsschool-devops-course-tasks')
+                        }
+                        branches('task_7')
+                      }
+                    }
+                    scriptPath('jenkins/Jenkinsfile')
+                  }
+                }
+              }
