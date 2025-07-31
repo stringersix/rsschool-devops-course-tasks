@@ -207,7 +207,7 @@ sudo apt install make -y
 
 - run minikube 
 ```
-minikube run --driver=docker
+minikube start --driver=docker
 ```
 
 - create and fill .env file in root as .env.example

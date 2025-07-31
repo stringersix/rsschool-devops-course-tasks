@@ -5,21 +5,30 @@ spec:
     - name: workspace-volume
       emptyDir: {}
   containers:
-  # JNLP
-    - name: jnlp
-      image: jenkins/inbound-agent:latest
-      volumeMounts:
-      - name: workspace-volume
-        mountPath: /workspace
-
-
-
-  # toolbox
-    - name: toolbox
-      image: daniluk666/toolbox:latest
-      command: ['sleep']
-      args: ['infinity']
-      tty: true
-      volumeMounts:
-      - name: workspace-volume
-        mountPath: /workspace
+  - name: jnlp
+    image: jenkins/inbound-agent:latest
+    volumeMounts:
+    - name: workspace-volume
+      mountPath: /workspace
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "256Mi"
+  - name: toolbox
+    image: daniluk666/toolbox:latest
+    command: ['sleep']
+    args: ['infinity']
+    tty: true
+    volumeMounts:
+    - name: workspace-volume
+      mountPath: /workspace
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "256Mi"
