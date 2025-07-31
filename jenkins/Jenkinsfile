@@ -25,20 +25,11 @@ pipeline {
         echo "🌐 Create namespace for monitoring..."
         kubectl create namespace monitoring || true
         '''
-      
-        sh '''
-        echo "🔐 Generate Alert Manager config from template and create secret..."
-        export SMTP_EMAIL="$SMTP_EMAIL" SMTP_PASS="$SMTP_PASS"
-        envsubst < monitoring/alerts/alertmanager.yaml.tpl | \
-        kubectl create secret generic alertmanager-config \
-        --from-file=alertmanager.yaml=/dev/stdin \
-        -n monitoring --dry-run=client -o yaml | kubectl apply -f -
-        '''
         sh '''
         echo "🔐 Creating Grafana admin secret..."
         kubectl create secret generic grafana-admin-secret \
         --from-literal=admin-user=admin \
-        --from-literal=admin-password="$GRAPHANA_ADMIN_PASS" \
+        --from-literal=admin-password="$GRAFANA_ADMIN_PASS" \
         -n monitoring --dry-run=client -o yaml | kubectl apply -f -
         '''
         sh '''
@@ -49,10 +40,15 @@ pipeline {
         kubectl label configmap jenkins-dashboard grafana_dashboard=1 -n monitoring --overwrite
         '''
         sh '''
-        echo "🔐 Creating SMTP secret..."
-        kubectl create secret generic smtp-auth-secret \
-        --from-literal=password="$SMTP_PASS" \
+        echo "🔐 Generate Alert Manager config from template and create secret..."
+        envsubst < monitoring/configs/notifications.tpl.yaml | \
+        kubectl create secret generic notification-config \
+        --from-file=alertmanager.yaml=/dev/stdin \
         -n monitoring --dry-run=client -o yaml | kubectl apply -f -
+        '''
+        sh '''
+        echo "📋 Creating Prometheus alert rules ConfigMap..."
+        kubectl apply -f monitoring/configs/rules.yaml -n monitoring
         '''
         }
       }
@@ -61,8 +57,12 @@ pipeline {
 
   stage('Setup Monitoring') {
     steps {
-      container('toolbox') {
-        sh '''
+      withCredentials([
+        string(credentialsId: 'SMTP_EMAIL', variable: 'SMTP_EMAIL'),
+        string(credentialsId: 'SMTP_PASS', variable: 'SMTP_PASS'),
+      ]) {
+        container('toolbox') {
+          sh '''
         helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
         helm repo update
 
@@ -70,8 +70,11 @@ pipeline {
         helm upgrade --install "prom-stack" prometheus-community/kube-prometheus-stack \
         --namespace monitoring --create-namespace \
         -f monitoring/helm/values.yaml \
+        --set smtp.email=$SMTP_EMAIL \
+        --set smtp.pass=$SMTP_PASS \
         --wait
         '''
+        }
       }
     }
   }
@@ -89,82 +92,5 @@ pipeline {
       }
     }
   }
-  
-  //   stage('Print env') {
-  //     steps {
-  //       sh 'echo $APP_ENV && echo $APP_PORT'
-  //     }
-  //   }
-
-  //   stage('Tests') {
-  //     steps {
-  //       container('toolbox') {
-  //         sh '''
-  //           set +e
-
-  //           pip install flask pytest
-  //           cd /workspace/deploy
-  //           echo "Running pytest tests..."
-  //           pytest test.py -q --disable-warnings > pytest_report.txt
-  //           exit_code=$?
-
-  //           echo "pytest exit code: $exit_code"
-
-  //           if [ $exit_code -ne 0 ]; then
-  //             echo "❌ Pytest reported failed tests:"
-  //             cat pytest_report.txt
-  //             exit $exit_code
-  //           else
-  //             echo "✅ Pytest passed all tests."
-  //           fi
-
-  //           set -e
-  //         '''
-  //       }
-  //     }
-  //   }
-
-  //   stage('Deploy flask-app with Helm') {
-  //     steps {
-  //       container('toolbox') {
-  //         sh '''
-  //           helm upgrade --install flask-app /workspace/deploy/helm \
-  //             --set image.repository=daniluk666/flask \
-  //             --set image.tag=latest \
-  //             --wait
-  //         '''
-  //       }
-  //     }
-  //   }
-
-  //   stage('Deploy monitoring with Helm') {
-  //     steps() {
-  //       container('toolbox') {
-  //         sh '''
-  //         	helm upgrade --install prom-stack prometheus-community/kube-prometheus-stack \
-  // 		        --namespace monitoring --create-namespace \
-  // 		        -f monitoring/helm/values.yaml \
-	// 	          --wait
-  //         '''
-  //         sh '''
-  //         	helm upgrade --install prom-stack prometheus-community/kube-prometheus-stack \
-  // 		        --namespace monitoring --create-namespace \
-  // 		        -f monitoring/helm/values.yaml \
-	// 	          --wait
-  //         '''
-  //       }
-  //     }
-  //   }
-
-  //   stage('Verify Deployment') {
-  //     steps {
-  //       container('toolbox') {
-  //         sh '''
-  //         pip install requests
-  //         python /workspace/deploy/verify.py http://flask-app.jenkins.svc.cluster.local:8080
-  //         '''
-  //       }
-  //     }
-  //   }
   }
 }

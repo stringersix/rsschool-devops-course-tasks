@@ -1,0 +1,19 @@
+groups:
+- name: node-alerts
+  rules:
+  - alert: HighCPUUsage
+    expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 50
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU usage detected on instance {{ $labels.instance }}"
+      description: "CPU usage is above 50% for more than 2 minutes."
+  - alert: LowMemory
+    expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 < 50
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Low memory available on instance {{ $labels.instance }}"
+      description: "Available memory is below 50%."

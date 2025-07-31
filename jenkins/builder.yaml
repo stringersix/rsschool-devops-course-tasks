@@ -4,9 +4,6 @@ spec:
   volumes:
     - name: workspace-volume
       emptyDir: {}
-    - name: env-volume
-      secret:
-        secretName: my-env-secret
   containers:
   # JNLP
     - name: jnlp
