@@ -51,7 +51,7 @@ setup-jenkins:
 	helm upgrade --install jenkins jenkins/jenkins -n jenkins --create-namespace -f jenkins/helm/values.yaml \
 	  	--set mySecrets.smtpEmail="$(SMTP_EMAIL)" \
   		--set mySecrets.smtpPass="$(SMTP_PASS)" \
-  		--set mySecrets.grafanaAdminPass="$(ADMIN_PASSWORD)" \
+  		--set mySecrets.grafanaAdminPass="$(GRAFANA_ADMIN_PASS)" \
 		--wait
 
 

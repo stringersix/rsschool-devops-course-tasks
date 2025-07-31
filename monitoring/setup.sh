@@ -18,14 +18,14 @@ envsubst < monitoring/configs/notifications.tpl.yaml | \
 kubectl create secret generic notification-config \
   --from-file=alertmanager.yaml=/dev/stdin \
   -n monitoring --dry-run=client -o yaml | kubectl apply -f -
-
-echo "📋 Creating Prometheus alert rules ConfigMap..."
-kubectl apply -f monitoring/configs/rules.yaml -n monitoring
   
 echo "🔧 Installing prom-stack in monitoring..."
 helm upgrade --install "prom-stack" prometheus-community/kube-prometheus-stack \
 --namespace monitoring \
 -f monitoring/helm/values.yaml \
 --wait
+
+echo "📋 Creating Prometheus alert rules ConfigMap..."
+kubectl apply -f monitoring/configs/rules.yaml -n monitoring
 
 echo "✅ Monitoring stack deployed successfully!"
