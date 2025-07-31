@@ -5,40 +5,6 @@ pipeline {
     }
   }
 
-  environment {
-    MESSAGE_SUCCESS = "✅ Deployment successful!"
-    MESSAGE_FAILURE = "❌ Deployment failed!"
-  }
-
-  post {
-    success {
-      script {
-        withCredentials([string(credentialsId: 'discord-webhook', variable: 'WEBHOOK_URL')]) {
-          def payload = [content: env.MESSAGE_SUCCESS]
-          httpRequest(
-            httpMode: 'POST',
-            contentType: 'APPLICATION_JSON',
-            requestBody: groovy.json.JsonOutput.toJson(payload),
-            url: WEBHOOK_URL
-          )
-        }
-      }
-    }
-    failure {
-      script {
-        withCredentials([string(credentialsId: 'discord-webhook', variable: 'WEBHOOK_URL')]) {
-          def payload = [content: env.MESSAGE_FAILURE]
-          httpRequest(
-            httpMode: 'POST',
-            contentType: 'APPLICATION_JSON',
-            requestBody: groovy.json.JsonOutput.toJson(payload),
-            url: WEBHOOK_URL
-          )
-        }
-      }
-    }
-  }
-
   stages {
     stage('Prepare Workspace') {
       steps {
@@ -46,87 +12,91 @@ pipeline {
       }
     }
 
-    stage('Tests') {
-      steps {
-        container('python') {
+
+  stage('Setup Secrets and Configurations for Monitoring'){
+    steps {
+      withCredentials([
+        string(credentialsId: 'SMTP_EMAIL', variable: 'SMTP_EMAIL'),
+        string(credentialsId: 'SMTP_PASS', variable: 'SMTP_PASS'),
+        string(credentialsId: 'GRAFANA_ADMIN_PASS', variable: 'GRAFANA_ADMIN_PASS')
+      ]) {
+        container('toolbox') {
+        sh '''
+        echo "🌐 Create namespace for monitoring..."
+        kubectl create namespace monitoring || true
+        '''
+        sh '''
+        echo "🔐 Creating Grafana admin secret..."
+        kubectl create secret generic grafana-admin-secret \
+        --from-literal=admin-user=admin \
+        --from-literal=admin-password="$GRAFANA_ADMIN_PASS" \
+        -n monitoring --dry-run=client -o yaml | kubectl apply -f -
+        '''
+        sh '''
+        echo "📊 Creating Grafana dashboard configmap..."
+        kubectl create configmap jenkins-dashboard \
+        --from-file=dashboard.json=monitoring/dashboard.json \
+        -n monitoring --dry-run=client -o yaml | kubectl apply -f -
+        kubectl label configmap jenkins-dashboard grafana_dashboard=1 -n monitoring --overwrite
+        '''
+        sh '''
+        echo "🔐 Generate Alert Manager config from template and create secret..."
+        envsubst < monitoring/configs/notifications.tpl.yaml | \
+        kubectl create secret generic notification-config \
+        --from-file=alertmanager.yaml=/dev/stdin \
+        -n monitoring --dry-run=client -o yaml | kubectl apply -f -
+        '''
+        }
+      }
+    }
+  }
+
+  stage('Setup Monitoring') {
+    steps {
+      withCredentials([
+        string(credentialsId: 'SMTP_EMAIL', variable: 'SMTP_EMAIL'),
+        string(credentialsId: 'SMTP_PASS', variable: 'SMTP_PASS'),
+      ]) {
+        container('toolbox') {
           sh '''
-            set +e
+        helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
+        helm repo update
 
-            pip install flask pytest
-            cd /workspace/deploy
-            echo "Running pytest tests..."
-            pytest test.py -q --disable-warnings > pytest_report.txt
-            exit_code=$?
-
-            echo "pytest exit code: $exit_code"
-
-            if [ $exit_code -ne 0 ]; then
-              echo "❌ Pytest reported failed tests:"
-              cat pytest_report.txt
-              exit $exit_code
-            else
-              echo "✅ Pytest passed all tests."
-            fi
-
-            set -e
-          '''
+        echo "🔧 Installing prom-stack in monitoring..."
+        helm upgrade --install "prom-stack" prometheus-community/kube-prometheus-stack \
+        --namespace monitoring --create-namespace \
+        -f monitoring/helm/values.yaml \
+        --set smtp.email=$SMTP_EMAIL \
+        --set smtp.pass=$SMTP_PASS \
+        --wait
+        '''
         }
       }
     }
+  }
 
-    stage('SonarQube Analysis') {
-      steps {
-        container('sonar-scanner') {
-          withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-            sh "echo $SONAR_TOKEN"
-            sh """
-              sonar-scanner \\
-                -Dsonar.projectKey=stringersix_rsschool-devops-course-tasks \\
-                -Dsonar.organization=stringersix \\
-                -Dsonar.host.url=https://sonarcloud.io \\
-                -Dsonar.token=\$SONAR_TOKEN \\
-                -Dsonar.sources=/workspace/deploy/app
-            """
-          }
-        }
+  stage('Creating Prometheus alert rules ConfigMap') {
+    steps {
+      container('toolbox') {
+       sh '''
+          kubectl apply -f monitoring/configs/rules.yaml -n monitoring
+      '''
       }
     }
+  }
 
-    stage('Build and Push Image') {
-      steps {
-        container('kaniko') {
-          sh '''
-            /kaniko/executor --dockerfile=/workspace/deploy/app/Dockerfile \
-                             --context=/workspace/deploy/app \
-                             --destination=daniluk666/flask:latest \
-                             --cleanup
-          '''
-        }
+  stage('Verify Monitoring Deployment') {
+    steps {
+      container('toolbox') {
+        sh '''
+        pip install requests
+        echo "Check Prometheus: "
+        python3 /workspace/deploy/verify.py http://prom-stack-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
+        echo "Check Grafana: "
+        python3 /workspace/deploy/verify.py http://prom-stack-grafana.monitoring.svc.cluster.local
+      '''
       }
     }
-
-    stage('Deploy with Helm') {
-      steps {
-        container('helm') {
-          sh '''
-            helm upgrade --install flask-app /workspace/deploy/helm \
-              --set image.repository=daniluk666/flask \
-              --set image.tag=latest \
-              --wait
-          '''
-        }
-      }
-    }
-
-    stage('Verify Deployment') {
-      steps {
-        container('python') {
-          sh '''
-          pip install requests
-          python /workspace/deploy/verify.py http://flask-app.jenkins.svc.cluster.local:8080
-          '''
-        }
-      }
-    }
+  }
   }
 }

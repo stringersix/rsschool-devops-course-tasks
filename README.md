@@ -103,7 +103,7 @@ helm uninstall flask-app
 minikube stop --all
 minikube delete --all
 ``` -->
-
+<!-- 
 
 - install docker
 ```
@@ -159,4 +159,76 @@ minikube service jenkins -n jenkins
 
 - create pipeline (path to jenkinsfile: jenkins/Jenkinsfile)
 
-- run pipeline and enjoy!
+- run pipeline and enjoy! -->
+
+
+init task 7
+
+- install docker
+```
+sudo apt update
+sudo apt install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+- install kubectl
+```
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+kubectl version --client
+```
+- install minikube
+```
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+minikube version
+```
+- install helm
+```
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+helm version
+```
+
+- add repos to helm
+
+```
+helm repo add jenkins https://charts.jenkins.io
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+```
+
+- install make 
+```
+sudo apt update
+sudo apt install make -y
+```
+
+- run minikube 
+```
+minikube start --driver=docker
+```
+
+- create and fill .env file in root as .env.example
+
+- install jenkins via make command (you need to provide docker-config file to the project root as "сonfig.json")
+```
+make setup-jenkins
+```
+
+- install monitoring tools via make command or (see next)
+```
+make setup-monitoring
+```
+
+- host jenkins in browser (use link from output), then configure and run pipeline. login and password - "admin"
+
+```
+minikube service jenkins -n jenkins
+```
+
+- after all jobs done, host grafana in browser
+```
+minikube service prom-stack-grafana -n monitoring
+```
